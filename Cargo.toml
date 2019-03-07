@@ -1,0 +1,37 @@
+[package]
+categories = ["embedded", "no-std"]
+name = "adc2tcp"
+description = "Poll ADC pin, report over TCP"
+license = "Apache-2.0"
+authors = ["Astro <astro@spaceboyz.net>"]
+version = "0.0.0"
+keywords = ["ethernet", "eth", "stm32", "adc", "tcp"]
+#repository = "https://github.com/astro/adc2tcp"
+#documentation = "https://docs.rs/adc2tcp/"
+edition = "2018"
+
+[badges]
+travis-ci = { repository = "astro/adc2tcp", branch = "master" }
+maintenance = { status = "experimental" }
+
+[package.metadata.docs.rs]
+features = []
+default-target = "thumbv7em-none-eabihf"
+
+[dependencies]
+volatile-register = "0.2"
+aligned = "0.3"
+panic-itm = "0.4"
+
+cortex-m = "0.5"
+cortex-m-rt = { version = "0.6", features = ["device"] }
+cortex-m-semihosting = "0.3"
+
+stm32f429 = { version = "0.6.1", features = ["rt"] }
+stm32-eth = { version = "0.0.1", features = ["target-stm32f429", "smoltcp-phy"] }
+smoltcp = { version = "0.5.0", default-features = false, features = ["proto-ipv4", "proto-ipv6", "socket-icmp", "socket-udp", "socket-tcp", "log", "verbose"] }
+
+
+[profile.release]
+debug = 2
+lto = true
