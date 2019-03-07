@@ -7,7 +7,7 @@ let
     # "thumbv7em-none-eabi"
     "thumbv7em-none-eabihf"
   ];
-  rust = builtins.trace "Selected channel ${rustChannel}"
+  rust = builtins.trace "rustChannel: selected channel ${rustChannel}"
     rustChannelOfTargets rustChannel null targets;
 in
 makeRustPlatform {

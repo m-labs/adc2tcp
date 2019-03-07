@@ -5,15 +5,9 @@ let
 in
 with import <nixpkgs> { overlays = [ mozillaOverlay ]; };
 let
-  rustPlatform = recurseIntoAttrs (
-    callPackage (import ./nix/rustPlatform.nix) { inherit rustChannel; }
-  );
+  rustPlatform = callPackage (import ./nix/rustPlatform.nix) { inherit rustChannel; };
+  openocd = callPackage (import ./nix/openocd.nix) {};
 in
-# mkShell {
-#   inputsFrom = with rustPlatform.rust; [
-#     rustc cargo
-#   ];
-# }
 stdenv.mkDerivation {
   name = "adc2tcp-env";
   buildInputs = with rustPlatform.rust; [
@@ -22,4 +16,15 @@ stdenv.mkDerivation {
 
   # Set Environment Variables
   RUST_BACKTRACE = 1;
+
+  shellHook = ''
+    echo "Starting openocd…"
+    ${openocd}/bin/openocd-nucleo-f429zi &
+
+    # Let openocd output scroll by
+    sleep 1
+
+    echo "Run 'cargo build --release'"
+    echo "Then 'gdb target/thumbv7em-none-eabihf/release/adc2tcp'"
+  '';
 }
