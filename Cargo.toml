@@ -34,5 +34,8 @@ smoltcp = { version = "0.5.0", default-features = false, features = ["proto-ipv4
 
 
 [profile.release]
-debug = 2
+codegen-units = 1
+incremental = false
+debug = true
+opt-level = "s"
 lto = true
