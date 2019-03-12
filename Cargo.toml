@@ -24,7 +24,6 @@ panic-abort = "0.3.1"
 cortex-m = "0.5"
 cortex-m-rt = { version = "0.6", features = ["device"] }
 cortex-m-semihosting = "0.3"
-
 stm32f4 = { version = "0.6", features = ["rt", "stm32f429"] }
 embedded-hal = "0.2"
 stm32f4xx-hal = { git = "https://github.com/stm32-rs/stm32f4xx-hal.git", features = ["rt", "stm32f429"] }
