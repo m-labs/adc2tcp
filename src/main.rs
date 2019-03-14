@@ -30,6 +30,8 @@ mod net;
 mod server;
 use server::Server;
 mod timer;
+mod led;
+use led::Led;
 
 const OUTPUT_INTERVAL: u32 = 1000;
 
@@ -81,6 +83,10 @@ fn main() -> ! {
     let gpioc = dp.GPIOC.split();
     let gpiog = dp.GPIOG.split();
 
+    let mut led_green = Led::green(gpiob.pb0.into_push_pull_output());
+    let mut led_blue = Led::blue(gpiob.pb7.into_push_pull_output());
+    let mut led_red = Led::red(gpiob.pb14.into_push_pull_output());
+
     info!("ADC init");
     adc_input::setup(&mut cp.NVIC, dp.ADC1, gpioa.pa3);
 
@@ -99,23 +105,30 @@ fn main() -> ! {
 
         let mut last_output = 0_u32;
         loop {
+            led_red.on();
             let now = timer::now().0;
             let instant = Instant::from_millis(now as i64);
             server.poll(instant);
 
             if now - last_output >= OUTPUT_INTERVAL {
+                led_blue.on();
                 let adc_value = adc_input::read();
                 adc_value.map(|adc_value| {
                     write!(server, "t={},pa3={}\r\n", now, adc_value).unwrap();
                 });
                 last_output = now;
+                led_blue.off();
             }
 
             // Update watchdog
             wd.feed();
+            led_red.off();
+
             // Wait for interrupts
             // if net.is_pending() {
+                led_green.on();
                 wfi();
+                led_green.off();
             // }
         }
     })
