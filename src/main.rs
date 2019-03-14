@@ -39,10 +39,10 @@ fn main() -> ! {
     stm32_eth::setup(&dp.RCC, &dp.SYSCFG);
     let _clocks = dp.RCC.constrain()
         .cfgr
-        .sysclk(168.mhz())
+        .sysclk(84.mhz())
         .hclk(84.mhz())
-        .pclk1(32.mhz())
-        .pclk2(64.mhz())
+        .pclk1(16.mhz())
+        .pclk2(32.mhz())
         .freeze();
 
     let mut wd = IndependentWatchdog::new(dp.IWDG);
