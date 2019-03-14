@@ -25,6 +25,9 @@ mod adc_input;
 mod net;
 mod server;
 use server::Server;
+mod timer;
+
+const OUTPUT_INTERVAL: u32 = 1000;
 
 #[entry]
 fn main() -> ! {
@@ -37,7 +40,7 @@ fn main() -> ! {
 
     let dp = Peripherals::take().unwrap();
     stm32_eth::setup(&dp.RCC, &dp.SYSCFG);
-    let _clocks = dp.RCC.constrain()
+    let clocks = dp.RCC.constrain()
         .cfgr
         .sysclk(84.mhz())
         .hclk(84.mhz())
@@ -62,20 +65,27 @@ fn main() -> ! {
         gpioa.pa1, gpioa.pa2, gpioa.pa7, gpiob.pb13, gpioc.pc1,
         gpioc.pc4, gpioc.pc5, gpiog.pg11, gpiog.pg13
     );
+
+    writeln!(stdout, "Timer setup").unwrap();
+    timer::setup(cp.SYST, clocks);
+
     writeln!(stdout, "Net startup").unwrap();
     net::run(&mut cp.NVIC, dp.ETHERNET_MAC, dp.ETHERNET_DMA, |net| {
         let mut server = Server::new(net);
 
-        let mut t = 0;
+        let mut last_output = 0_u32;
         loop {
-            t += 100;
-            let now = Instant::from_millis(t);
-            server.poll(now);
+            let now = timer::now().0;
+            let instant = Instant::from_millis(now as i64);
+            server.poll(instant);
 
-            let adc_value = adc_input::read();
-            adc_value.map(|adc_value| {
-                writeln!(server, "t={},pa3={}", t, adc_value).unwrap();
-            });
+            if now - last_output >= OUTPUT_INTERVAL {
+                let adc_value = adc_input::read();
+                adc_value.map(|adc_value| {
+                    write!(server, "t={},pa3={}\r\n", now, adc_value).unwrap();
+                });
+                last_output = now;
+            }
 
             // Update watchdog
             wd.feed();
