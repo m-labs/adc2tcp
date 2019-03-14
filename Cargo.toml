@@ -19,11 +19,12 @@ features = []
 default-target = "thumbv7em-none-eabihf"
 
 [dependencies]
-panic-abort = "0.3.1"
-
+panic-abort = { version = "0.3.1" }
+panic-semihosting = { version = "0.5.1", optional = true }
+log = "0.4"
 cortex-m = "0.5"
 cortex-m-rt = { version = "0.6", features = ["device"] }
-cortex-m-semihosting = "0.3"
+cortex-m-log = { version = "0.4", features = ["log-integration"] }
 stm32f4 = { version = "0.6", features = ["rt", "stm32f429"] }
 embedded-hal = "0.2"
 stm32f4xx-hal = { git = "https://github.com/stm32-rs/stm32f4xx-hal.git", features = ["rt", "stm32f429"] }
@@ -31,6 +32,8 @@ stm32f4xx-hal = { git = "https://github.com/stm32-rs/stm32f4xx-hal.git", feature
 stm32-eth = { version = "0.1.0", features = ["smoltcp-phy", "nucleo-f429zi"] }
 smoltcp = { version = "0.5.0", default-features = false, features = ["proto-ipv4", "proto-ipv6", "socket-icmp", "socket-udp", "socket-tcp", "log", "verbose"] }
 
+[features]
+semihosting = ["panic-semihosting", "cortex-m-log/semihosting"]
 
 [profile.release]
 codegen-units = 1

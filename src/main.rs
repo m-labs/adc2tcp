@@ -4,8 +4,15 @@
 #![feature(never_type)]
 
 #[allow(unused_extern_crates)]
+#[cfg(not(feature = "semihosting"))]
 extern crate panic_abort;
+#[cfg(feature = "semihosting")]
+extern crate panic_semihosting;
 
+#[macro_use]
+extern crate log;
+
+use core::fmt::Write;
 use cortex_m::asm::wfi;
 use cortex_m_rt::entry;
 use embedded_hal::watchdog::{WatchdogEnable, Watchdog};
@@ -18,9 +25,6 @@ use stm32f4xx_hal::{
 };
 use smoltcp::time::Instant;
 
-use core::fmt::Write;
-use cortex_m_semihosting::hio;
-
 mod adc_input;
 mod net;
 mod server;
@@ -29,10 +33,30 @@ mod timer;
 
 const OUTPUT_INTERVAL: u32 = 1000;
 
+#[cfg(not(feature = "semihosting"))]
+fn init_log() {}
+
+#[cfg(feature = "semihosting")]
+fn init_log() {
+    use log::LevelFilter;
+    use cortex_m_log::log::{Logger, init};
+    use cortex_m_log::printer::semihosting::{InterruptOk, hio::HStdout};
+    static mut LOGGER: Option<Logger<InterruptOk<HStdout>>> = None;
+    let logger = Logger {
+        inner: InterruptOk::<_>::stdout().expect("semihosting stdout"),
+        level: LevelFilter::Info,
+    };
+    let logger = unsafe {
+        LOGGER.get_or_insert(logger)
+    };
+
+    init(logger).expect("set logger");
+}
+
 #[entry]
 fn main() -> ! {
-    let mut stdout = hio::hstdout().unwrap();
-    writeln!(stdout, "adc2tcp").unwrap();
+    init_log();
+    info!("adc2tcp");
 
     let mut cp = CorePeripherals::take().unwrap();
     cp.SCB.enable_icache();
@@ -57,19 +81,19 @@ fn main() -> ! {
     let gpioc = dp.GPIOC.split();
     let gpiog = dp.GPIOG.split();
 
-    writeln!(stdout, "ADC init").unwrap();
+    info!("ADC init");
     adc_input::setup(&mut cp.NVIC, dp.ADC1, gpioa.pa3);
 
-    writeln!(stdout, "Eth setup").unwrap();
+    info!("Eth setup");
     stm32_eth::setup_pins(
         gpioa.pa1, gpioa.pa2, gpioa.pa7, gpiob.pb13, gpioc.pc1,
         gpioc.pc4, gpioc.pc5, gpiog.pg11, gpiog.pg13
     );
 
-    writeln!(stdout, "Timer setup").unwrap();
+    info!("Timer setup");
     timer::setup(cp.SYST, clocks);
 
-    writeln!(stdout, "Net startup").unwrap();
+    info!("Net startup");
     net::run(&mut cp.NVIC, dp.ETHERNET_MAC, dp.ETHERNET_DMA, |net| {
         let mut server = Server::new(net);
 

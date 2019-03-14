@@ -24,7 +24,7 @@ stdenv.mkDerivation {
     # Let openocd output scroll by
     sleep 1
 
-    echo "Run 'cargo build --release'"
+    echo "Run 'cargo build --release --features=semihosting'"
     echo "Then 'gdb target/thumbv7em-none-eabihf/release/adc2tcp'"
   '';
 }
