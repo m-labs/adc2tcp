@@ -105,20 +105,22 @@ fn main() -> ! {
 
         let mut last_output = 0_u32;
         loop {
-            led_red.on();
+            led_green.on();
             let now = timer::now().0;
             let instant = Instant::from_millis(now as i64);
             server.poll(instant);
+            led_green.off();
 
+            led_blue.on();
+            let now = timer::now().0;
             if now - last_output >= OUTPUT_INTERVAL {
-                led_blue.on();
                 let adc_value = adc_input::read();
                 adc_value.map(|adc_value| {
                     write!(server, "t={},pa3={}\r\n", now, adc_value).unwrap();
                 });
                 last_output = now;
-                led_blue.off();
             }
+            led_blue.off();
 
             // Update watchdog
             wd.feed();
