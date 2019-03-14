@@ -75,7 +75,7 @@ fn main() -> ! {
         .freeze();
 
     let mut wd = IndependentWatchdog::new(dp.IWDG);
-    wd.start(8000u32.ms());
+    wd.start(1000u32.ms());
     wd.feed();
 
     let gpioa = dp.GPIOA.split();
