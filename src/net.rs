@@ -1,6 +1,9 @@
 //! As there is only one peripheral, supporting data structures are
 //! declared once and globally.
 
+use core::cell::RefCell;
+use cortex_m::interrupt::Mutex;
+use bare_metal::CriticalSection;
 use stm32f4xx_hal::{
     stm32::{interrupt, Peripherals, NVIC, ETHERNET_MAC, ETHERNET_DMA},
 };
@@ -17,6 +20,7 @@ static mut TX_RING: Option<[RingEntry<TxDescriptor>; 2]> = None;
 // TODO: generate one from device id
 const SRC_MAC: [u8; 6] = [0x00, 0x00, 0xDE, 0xAD, 0xBE, 0xEF];
 
+static NET_PENDING: Mutex<RefCell<bool>> = Mutex::new(RefCell::new(false));
 
 pub fn run<F>(nvic: &mut NVIC, ethernet_mac: ETHERNET_MAC, ethernet_dma: ETHERNET_DMA, f: F) -> !
 where
@@ -79,6 +83,21 @@ impl<'a> NetInterface<'a> {
 /// and TODO: set pending flag
 #[interrupt]
 fn ETH() {
+    cortex_m::interrupt::free(|cs| {
+        *NET_PENDING.borrow(cs)
+            .borrow_mut() = true;
+    });
+
     let p = unsafe { Peripherals::steal() };
     stm32_eth::eth_interrupt_handler(&p.ETHERNET_DMA);
+}
+
+pub fn is_pending(cs: &CriticalSection) -> bool {
+    *NET_PENDING.borrow(cs)
+        .borrow()
+}
+
+pub fn clear_pending(cs: &CriticalSection) {
+    *NET_PENDING.borrow(cs)
+        .borrow_mut() = false;
 }

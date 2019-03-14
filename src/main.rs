@@ -122,14 +122,16 @@ fn main() -> ! {
 
             // Update watchdog
             wd.feed();
-            led_red.off();
 
-            // Wait for interrupts
-            // if net.is_pending() {
-                led_green.on();
-                wfi();
-                led_green.off();
-            // }
+            led_red.on();
+            cortex_m::interrupt::free(|cs| {
+                if !net::is_pending(cs) {
+                    // Wait for interrupts
+                    wfi();
+                    net::clear_pending(cs);
+                }
+            });
+            led_red.off();
         }
     })
 }

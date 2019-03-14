@@ -22,6 +22,7 @@ default-target = "thumbv7em-none-eabihf"
 panic-abort = { version = "0.3.1" }
 panic-semihosting = { version = "0.5.1", optional = true }
 log = "0.4"
+bare-metal = "0.2"
 cortex-m = "0.5"
 cortex-m-rt = { version = "0.6", features = ["device"] }
 cortex-m-log = { version = "0.4", features = ["log-integration"] }
