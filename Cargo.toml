@@ -32,7 +32,7 @@ embedded-hal = "0.2"
 stm32f4xx-hal = { git = "https://github.com/stm32-rs/stm32f4xx-hal.git", features = ["rt", "stm32f429"] }
 #stm32-eth = { version = "0.1.1", features = ["smoltcp-phy", "nucleo-f429zi"] }
 stm32-eth = { git = "https://github.com/stm32-rs/stm32-eth.git", features = ["smoltcp-phy", "nucleo-f429zi"] }
-smoltcp = { version = "0.5.0", default-features = false, features = ["proto-ipv4", "proto-ipv6", "socket-icmp", "socket-udp", "socket-tcp", "log", "verbose"] }
+smoltcp = { version = "0.5.0", default-features = false, features = ["proto-ipv4", "socket-tcp", "log"] }
 
 [features]
 semihosting = ["panic-semihosting", "cortex-m-log/semihosting"]
