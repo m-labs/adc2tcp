@@ -11,7 +11,7 @@ in
 stdenv.mkDerivation {
   name = "adc2tcp-env";
   buildInputs = with rustPlatform.rust; [
-    rustc cargo
+    rustc cargo gdb
   ];
 
   # Set Environment Variables

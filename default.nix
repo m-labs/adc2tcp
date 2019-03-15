@@ -12,7 +12,6 @@ stdenv.mkDerivation {
   buildInputs = [
     adc2tcp
     openocd
-    gdb
   ];
   src = ./.;
   dontBuild = true;
