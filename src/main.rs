@@ -1,5 +1,6 @@
 #![no_std]
 #![no_main]
+#![deny(warnings, unused)]
 
 #[allow(unused_extern_crates)]
 #[cfg(not(feature = "semihosting"))]
