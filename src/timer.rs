@@ -9,7 +9,7 @@ use stm32f4xx_hal::{
 };
 
 /// Rate in Hz
-const TIMER_RATE: u32 = 10;
+const TIMER_RATE: u32 = 20;
 /// Interval duration in milliseconds
 const TIMER_DELTA: u32 = 1000 / TIMER_RATE;
 /// Elapsed time in milliseconds
