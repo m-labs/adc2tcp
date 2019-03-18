@@ -2,12 +2,11 @@
 categories = ["embedded", "no-std"]
 name = "adc2tcp"
 description = "Poll ADC pin, report over TCP"
-license = "Apache-2.0"
+license = "GPL-3.0-only"
 authors = ["Astro <astro@spaceboyz.net>"]
 version = "0.0.0"
 keywords = ["ethernet", "eth", "stm32", "adc", "tcp"]
 repository = "https://github.com/m-labs/adc2tcp"
-#documentation = "https://docs.rs/adc2tcp/"
 edition = "2018"
 
 [badges]
