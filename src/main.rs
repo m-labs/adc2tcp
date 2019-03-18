@@ -26,6 +26,7 @@ use stm32f4xx_hal::{
 use smoltcp::time::Instant;
 
 mod adc_input;
+use adc_input::AdcInput;
 mod net;
 mod server;
 use server::Server;
@@ -88,7 +89,7 @@ fn main() -> ! {
     let mut led_red = Led::red(gpiob.pb14.into_push_pull_output());
 
     info!("ADC init");
-    adc_input::setup(&mut cp.NVIC, dp.ADC1, gpioa.pa3);
+    let mut adc_input = AdcInput::new(dp.ADC1, gpioa.pa3);
 
     info!("Eth setup");
     stm32_eth::setup_pins(
@@ -113,10 +114,8 @@ fn main() -> ! {
                 led_blue.on();
                 let now = timer::now().0;
                 if now - last_output >= OUTPUT_INTERVAL {
-                    let adc_value = adc_input::read();
-                    adc_value.map(|adc_value| {
-                        write!(server, "t={},pa3={}\r\n", now, adc_value).unwrap();
-                    });
+                    let adc_value = adc_input.read();
+                    write!(server, "t={},pa3={}\r\n", now, adc_value).unwrap();
                     last_output = now;
                 }
                 led_blue.off();
