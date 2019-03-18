@@ -2,11 +2,28 @@
 
 let
   mozillaOverlay = import (builtins.fetchTarball https://github.com/mozilla/nixpkgs-mozilla/archive/master.tar.gz);
+  pkgs = import <nixpkgs> { overlays = [ mozillaOverlay ]; };
+  # `lib.systems.examples.armhf-embedded` from nixpkgs master
+  # (TODO: use directly starting with NixOS 19.0X)
+  targetPlatform = {
+    config = "arm-none-eabihf";
+    libc = "newlib";
+  };
 in
-with import <nixpkgs> { overlays = [ mozillaOverlay ]; };
+with pkgs;
 let
   rustPlatform = callPackage (import ./nix/rustPlatform.nix) { inherit rustChannel; };
   openocd = callPackage (import ./nix/openocd.nix) {};
+  # TODO: gdb 8.2.1 from NixOS >= 19.XX is multiarch by default.
+  # remove the following as `gdb` is already in scope
+  gdb = pkgs.gdb.override {
+    stdenv = stdenv.override {
+      targetPlatform = {
+        config = "arm-none-eabihf";
+        libc = "newlib";
+      };
+    };
+  };
 in
 stdenv.mkDerivation {
   name = "adc2tcp-env";
@@ -25,6 +42,6 @@ stdenv.mkDerivation {
     sleep 1
 
     echo "Run 'cargo build --release --features=semihosting'"
-    echo "Then 'gdb target/thumbv7em-none-eabihf/release/adc2tcp'"
+    echo "Then '${targetPlatform.config}-gdb target/thumbv7em-none-eabihf/release/adc2tcp'"
   '';
 }
