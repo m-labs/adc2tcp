@@ -1,7 +1,5 @@
 #![no_std]
 #![no_main]
-// Enable returning `!`
-#![feature(never_type)]
 
 #[allow(unused_extern_crates)]
 #[cfg(not(feature = "semihosting"))]
