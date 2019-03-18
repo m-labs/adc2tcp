@@ -100,40 +100,42 @@ fn main() -> ! {
     timer::setup(cp.SYST, clocks);
 
     info!("Net startup");
-    net::run(&mut cp.NVIC, dp.ETHERNET_MAC, dp.ETHERNET_DMA, |net| {
-        let mut server = Server::new(net);
+    net::run(&mut cp.NVIC, dp.ETHERNET_MAC, dp.ETHERNET_DMA, |iface| {
+        Server::run(iface, |server| {
+            let mut last_output = 0_u32;
+            loop {
+                led_green.on();
+                let now = timer::now().0;
+                let instant = Instant::from_millis(now as i64);
+                server.poll(instant);
+                led_green.off();
 
-        let mut last_output = 0_u32;
-        loop {
-            led_green.on();
-            let now = timer::now().0;
-            let instant = Instant::from_millis(now as i64);
-            server.poll(instant);
-            led_green.off();
-
-            led_blue.on();
-            let now = timer::now().0;
-            if now - last_output >= OUTPUT_INTERVAL {
-                let adc_value = adc_input::read();
-                adc_value.map(|adc_value| {
-                    write!(server, "t={},pa3={}\r\n", now, adc_value).unwrap();
-                });
-                last_output = now;
-            }
-            led_blue.off();
-
-            // Update watchdog
-            wd.feed();
-
-            led_red.on();
-            cortex_m::interrupt::free(|cs| {
-                if !net::is_pending(cs) {
-                    // Wait for interrupts
-                    wfi();
-                    net::clear_pending(cs);
+                led_blue.on();
+                let now = timer::now().0;
+                if now - last_output >= OUTPUT_INTERVAL {
+                    let adc_value = adc_input::read();
+                    adc_value.map(|adc_value| {
+                        write!(server, "t={},pa3={}\r\n", now, adc_value).unwrap();
+                    });
+                    last_output = now;
                 }
-            });
-            led_red.off();
-        }
-    })
+                led_blue.off();
+
+                // Update watchdog
+                wd.feed();
+
+                led_red.on();
+                cortex_m::interrupt::free(|cs| {
+                    if !net::is_pending(cs) {
+                        // Wait for interrupts
+                        wfi();
+                        net::clear_pending(cs);
+                    }
+                });
+                led_red.off();
+            }
+        });
+    });
+
+    unimplemented!()
 }

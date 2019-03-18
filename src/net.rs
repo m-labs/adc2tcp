@@ -7,14 +7,15 @@ use bare_metal::CriticalSection;
 use stm32f4xx_hal::{
     stm32::{interrupt, Peripherals, NVIC, ETHERNET_MAC, ETHERNET_DMA},
 };
-use smoltcp::time::Instant;
 use smoltcp::wire::{EthernetAddress, IpAddress, IpCidr};
 use smoltcp::iface::{NeighborCache, EthernetInterfaceBuilder, EthernetInterface};
-use smoltcp::socket::SocketSet;
 use stm32_eth::{Eth, RingEntry, RxDescriptor, TxDescriptor};
 
-// TODO: ram regions
+/// Not on the stack so that stack can be placed in CCMRAM (which the
+/// ethernet peripheral cannot access)
 static mut RX_RING: Option<[RingEntry<RxDescriptor>; 8]> = None;
+/// Not on the stack so that stack can be placed in CCMRAM (which the
+/// ethernet peripheral cannot access)
 static mut TX_RING: Option<[RingEntry<TxDescriptor>; 2]> = None;
 
 // TODO: generate one from device id
@@ -22,9 +23,9 @@ const SRC_MAC: [u8; 6] = [0x00, 0x00, 0xDE, 0xAD, 0xBE, 0xEF];
 
 static NET_PENDING: Mutex<RefCell<bool>> = Mutex::new(RefCell::new(false));
 
-pub fn run<F>(nvic: &mut NVIC, ethernet_mac: ETHERNET_MAC, ethernet_dma: ETHERNET_DMA, f: F) -> !
+pub fn run<F>(nvic: &mut NVIC, ethernet_mac: ETHERNET_MAC, ethernet_dma: ETHERNET_DMA, f: F)
 where
-    F: FnOnce(&mut NetInterface) -> !
+    F: FnOnce(EthernetInterface<&mut stm32_eth::Eth<'static, 'static>>),
 {
     let rx_ring = unsafe {
         RX_RING.get_or_insert(Default::default())
@@ -49,37 +50,10 @@ where
         .neighbor_cache(neighbor_cache)
         .finalize();
 
-    let mut sockets_storage = [None, None, None, None];
-    let sockets = SocketSet::new(&mut sockets_storage[..]);
-
-    let mut net_iface = NetInterface {
-        iface,
-        sockets,
-    };
-    f(&mut net_iface);
+    f(iface);
 }
 
-pub struct NetInterface<'a> {
-    iface: EthernetInterface<'a, 'a, 'a, &'a mut stm32_eth::Eth<'static, 'static>>,
-    sockets: SocketSet<'a, 'static, 'static>,
-}
-
-impl<'a> NetInterface<'a> {
-    /// Passes the boolean that indicates any sockets change.
-    pub fn poll(&mut self, now: Instant) -> bool {
-        // TODO: clear pending flag
-
-        self.iface.poll(&mut self.sockets, now)
-            .ok()
-            .unwrap_or(false)
-    }
-
-    pub fn sockets(&mut self) -> &mut SocketSet<'a, 'static, 'static> {
-        &mut self.sockets
-    }
-}
-
-/// Wwake up from `wfi()`, clear interrupt flags,
+/// Wake up from `wfi()`, clear interrupt flags,
 /// and TODO: set pending flag
 #[interrupt]
 fn ETH() {
