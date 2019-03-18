@@ -38,6 +38,7 @@ pub struct Server<'a, 'b> {
 }
 
 impl<'a, 'b> Server<'a, 'b> {
+    /// Run a server with stack-allocated sockets
     pub fn run<F>(net: EthernetInterface<'a, 'a, 'a, &'a mut stm32_eth::Eth<'static, 'static>>, f: F)
     where
         F: FnOnce(&mut Server<'a, '_>),
@@ -74,19 +75,32 @@ impl<'a, 'b> Server<'a, 'b> {
         f(&mut server);
     }
 
-    pub fn poll(&mut self, now: Instant) {
+    /// Poll the interface and the sockets
+    pub fn poll(&mut self, now: Instant) -> Result<(), smoltcp::Error> {
+        // Poll smoltcp EthernetInterface
+        let mut poll_error = None;
         let activity = self.net.poll(&mut self.sockets, now)
-            .unwrap_or(true);
-        if ! activity {
-            return;
+            .unwrap_or_else(|e| {
+                poll_error = Some(e);
+                true
+            });
+
+        if activity {
+            // Listen on all sockets
+            for handle in &self.handles {
+                let mut socket = self.sockets.get::<TcpSocket>(*handle);
+                if ! socket.is_open() {
+                    let _ = socket.listen(TCP_PORT);
+                }
+            }
         }
 
-        for handle in &self.handles {
-            let mut socket = self.sockets.get::<TcpSocket>(*handle);
-            if ! socket.is_open() {
-                socket.listen(TCP_PORT)
-                    .unwrap();
-            }
+        // Pass some smoltcp errors to the caller
+        match poll_error {
+            None => Ok(()),
+            Some(smoltcp::Error::Malformed) => Ok(()),
+            Some(smoltcp::Error::Unrecognized) => Ok(()),
+            Some(e) => Err(e),
         }
     }
 }
