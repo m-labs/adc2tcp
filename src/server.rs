@@ -8,6 +8,9 @@ use smoltcp::{
 
 
 const TCP_PORT: u16 = 23;
+/// Number of server sockets and therefore concurrent client
+/// sessions. Many data structures in `Server::run()` correspond to
+/// this const.
 const SOCKET_COUNT: usize = 8;
 
 const TCP_RX_BUFFER_SIZE: usize = 2048;
@@ -105,6 +108,7 @@ impl<'a, 'b> Server<'a, 'b> {
     }
 }
 
+/// Reusing the `fmt::Write` trait just for `write!()` convenience
 impl<'a, 's> fmt::Write for Server<'a, 's> {
     /// Write to all connected clients
     fn write_str(&mut self, slice: &str) -> fmt::Result {

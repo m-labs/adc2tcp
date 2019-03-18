@@ -8,18 +8,20 @@ use stm32f4xx_hal::{
     stm32::SYST,
 };
 
-/// rate in Hz
+/// Rate in Hz
 const TIMER_RATE: u32 = 10;
-/// interval duration in milliseconds
+/// Interval duration in milliseconds
 const TIMER_DELTA: u32 = 1000 / TIMER_RATE;
 /// Elapsed time in milliseconds
 static TIMER_MS: Mutex<RefCell<u32>> = Mutex::new(RefCell::new(0));
 
+/// Setup SysTick exception
 pub fn setup(syst: SYST, clocks: Clocks) {
     let mut timer = Timer::syst(syst, TIMER_RATE.hz(), clocks);
     timer.listen(TimerEvent::TimeOut);
 }
 
+/// SysTick exception (Timer)
 #[exception]
 fn SysTick() {
     cortex_m::interrupt::free(|cs| {
@@ -28,6 +30,7 @@ fn SysTick() {
     });
 }
 
+/// Obtain current time in milliseconds
 pub fn now() -> MilliSeconds {
     let ms = cortex_m::interrupt::free(|cs| {
         *TIMER_MS.borrow(cs)

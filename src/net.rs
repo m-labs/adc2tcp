@@ -21,8 +21,11 @@ static mut TX_RING: Option<[RingEntry<TxDescriptor>; 2]> = None;
 // TODO: generate one from device id
 const SRC_MAC: [u8; 6] = [0x00, 0x00, 0xDE, 0xAD, 0xBE, 0xEF];
 
+/// Interrupt pending flag: set by the `ETH` interrupt handler, should
+/// be cleared before polling the interface.
 static NET_PENDING: Mutex<RefCell<bool>> = Mutex::new(RefCell::new(false));
 
+/// Run callback `f` with ethernet driver and TCP/IP stack
 pub fn run<F>(nvic: &mut NVIC, ethernet_mac: ETHERNET_MAC, ethernet_dma: ETHERNET_DMA, f: F)
 where
     F: FnOnce(EthernetInterface<&mut stm32_eth::Eth<'static, 'static>>),
@@ -33,12 +36,14 @@ where
     let tx_ring = unsafe {
         TX_RING.get_or_insert(Default::default())
     };
+    // Ethernet driver
     let mut eth_dev = Eth::new(
         ethernet_mac, ethernet_dma,
         &mut rx_ring[..], &mut tx_ring[..]
     );
     eth_dev.enable_interrupt(nvic);
 
+    // IP stack
     let local_addr = IpAddress::v4(192, 168, 69, 3);
     let mut ip_addrs = [IpCidr::new(local_addr, 24)];
     let mut neighbor_storage = [None; 16];
@@ -53,8 +58,8 @@ where
     f(iface);
 }
 
-/// Wake up from `wfi()`, clear interrupt flags,
-/// and TODO: set pending flag
+/// Potentially wake up from `wfi()`, set the interrupt pending flag,
+/// clear interrupt flags.
 #[interrupt]
 fn ETH() {
     cortex_m::interrupt::free(|cs| {
@@ -66,11 +71,14 @@ fn ETH() {
     stm32_eth::eth_interrupt_handler(&p.ETHERNET_DMA);
 }
 
+/// Has an interrupt occurred since last call to `clear_pending()`?
 pub fn is_pending(cs: &CriticalSection) -> bool {
     *NET_PENDING.borrow(cs)
         .borrow()
 }
 
+/// Clear the interrupt pending flag before polling the interface for
+/// data.
 pub fn clear_pending(cs: &CriticalSection) {
     *NET_PENDING.borrow(cs)
         .borrow_mut() = false;

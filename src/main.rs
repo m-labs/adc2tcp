@@ -33,6 +33,10 @@ mod timer;
 mod led;
 use led::Led;
 
+/// Interval at which to sample the ADC input and broadcast to all
+/// clients.
+///
+/// This should be a multiple of the `TIMER_RATE`.
 const OUTPUT_INTERVAL: u32 = 1000;
 
 #[cfg(not(feature = "semihosting"))]
@@ -55,6 +59,7 @@ fn init_log() {
     init(logger).expect("set logger");
 }
 
+/// Initialization and main loop
 #[entry]
 fn main() -> ! {
     init_log();
