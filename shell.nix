@@ -12,7 +12,7 @@ let
 in
 with pkgs;
 let
-  rustPlatform = callPackage (import ./nix/rustPlatform.nix) { inherit rustChannel; };
+  rustPlatform = callPackage (import ./nix/rustPlatform.nix) {};
   openocd = callPackage (import ./nix/openocd.nix) {};
   # TODO: gdb 8.2.1 from NixOS >= 19.XX is multiarch by default.
   # remove the following as `gdb` is already in scope
