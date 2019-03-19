@@ -3,9 +3,15 @@
   rustManifest ? ./nix/channel-rust-nightly.toml
 }:
 
-{
-  adc2tcp = pkgs.lib.hydraJob (pkgs.callPackage (import ./default.nix) {
+with pkgs;
+let
+  adc2tcp = callPackage (import ./default.nix) {
     inherit rustManifest;
     mozillaOverlay = import <mozillaOverlay>;
-  });
+  };
+in
+{
+  build = runCommand "build-adc2tcp" {
+    buildInputs = [ adc2tcp ];
+  };
 }
