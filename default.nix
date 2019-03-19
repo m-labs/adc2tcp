@@ -1,10 +1,19 @@
-let
-  mozillaOverlay = import <mozillaOverlay>;
-  pkgs = import <nixpkgs> { overlays = [ mozillaOverlay ]; };
-in
+{ # Use master branch of the overlay by default
+  mozillaOverlay ? import (builtins.fetchTarball https://github.com/mozilla/nixpkgs-mozilla/archive/master.tar.gz),
+  # This is needed when nix-build is run with option
+  # `restrict-eval`. Setting this flag to `true` causes the
+  # rustPlatform to be generated from the bundled
+  # `channel-rust-nightly.toml`. By default (`false`) the
+  # mozillaOverlay fetches the latest manifest.
+  rustRestrictedManifest ? false,
+  pkgs ? import <nixpkgs> { overlays = [ mozillaOverlay ]; },
+}:
+
 with pkgs;
 let
-  rustPlatform = recurseIntoAttrs (callPackage (import ./nix/rustPlatform.nix) {});
+  rustPlatform = recurseIntoAttrs (callPackage (import ./nix/rustPlatform.nix) {
+    restrictedManifest = rustRestrictedManifest;
+  });
   adc2tcp = callPackage (import ./nix/adc2tcp.nix) { inherit rustPlatform; };
   openocd = callPackage (import ./nix/openocd.nix) {};
 in
