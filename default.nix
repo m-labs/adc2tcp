@@ -1,7 +1,8 @@
 let
-  mozillaOverlay = import (builtins.fetchTarball https://github.com/mozilla/nixpkgs-mozilla/archive/master.tar.gz);
+  mozillaOverlay = import <mozillaOverlay>;
+  pkgs = import <nixpkgs> { overlays = [ mozillaOverlay ]; };
 in
-with import <nixpkgs> { overlays = [ mozillaOverlay ]; };
+with pkgs;
 let
   rustPlatform = recurseIntoAttrs (callPackage (import ./nix/rustPlatform.nix) {});
   adc2tcp = callPackage (import ./nix/adc2tcp.nix) { inherit rustPlatform; };
