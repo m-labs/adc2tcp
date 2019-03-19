@@ -1,7 +1,7 @@
 { recurseIntoAttrs, stdenv, lib,
   makeRustPlatform, rustChannelOfTargets,
   fetchurl, patchelf,
-  restrictedManifest ? false
+  rustManifest ? ./channel-rust-nightly.toml
 }:
 
 let
@@ -13,7 +13,7 @@ let
     "thumbv7em-none-eabihf"
   ];
   rustChannel =
-    lib.rustLib.fromManifestFile ./channel-rust-nightly.toml {
+    lib.rustLib.fromManifestFile rustManifest {
       inherit stdenv fetchurl patchelf;
     };
   rust =
