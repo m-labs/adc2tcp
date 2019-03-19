@@ -1,5 +1,5 @@
 { recurseIntoAttrs, stdenv, lib,
-  makeRustPlatform, rustChannelOfTargets,
+  makeRustPlatform,
   fetchurl, patchelf,
   rustManifest ? ./channel-rust-nightly.toml
 }:
@@ -17,11 +17,9 @@ let
       inherit stdenv fetchurl patchelf;
     };
   rust =
-    if restrictedManifest
-    then
-      rustChannel.rust.override { inherit targets; }
-    else
-      rustChannelOfTargets "nightly" null targets;
+    rustChannel.rust.override {
+      inherit targets;
+    };
 in
 makeRustPlatform {
   rustc = rust;

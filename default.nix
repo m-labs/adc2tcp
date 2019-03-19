@@ -1,9 +1,11 @@
 { # Use master branch of the overlay by default
   mozillaOverlay ? import (builtins.fetchTarball https://github.com/mozilla/nixpkgs-mozilla/archive/master.tar.gz),
-  pkgs ? import <nixpkgs> { overlays = [ mozillaOverlay ]; },
   rustManifest ? builtins.fetchurl "https://static.rust-lang.org/dist/channel-rust-nightly.toml"
 }:
 
+let
+  pkgs = import <nixpkgs> { overlays = [ mozillaOverlay ]; };
+in
 with pkgs;
 let
   rustPlatform = recurseIntoAttrs (callPackage (import ./nix/rustPlatform.nix) {
