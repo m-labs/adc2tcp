@@ -4,7 +4,7 @@
 }:
 
 {
-  adc2tcp = pkgs.lib.hydraJob (import ./default.nix {
+  adc2tcp = pkgs.lib.hydraJob (pkgs.callPackage (import ./default.nix) {
     inherit rustManifest;
     mozillaOverlay = import <mozillaOverlay>;
   });
