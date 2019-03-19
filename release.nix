@@ -1,6 +1,7 @@
 # For running on Hydra
-
-import ./default.nix {
-  mozillaOverlay = import <mozillaOverlay>;
-  rustRestrictedManifest = true;
+{
+  adc2tcp = import ./default.nix {
+    mozillaOverlay = import <mozillaOverlay>;
+    rustRestrictedManifest = true;
+  };
 }
