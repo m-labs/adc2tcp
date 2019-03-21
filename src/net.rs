@@ -18,16 +18,15 @@ static mut RX_RING: Option<[RingEntry<RxDescriptor>; 8]> = None;
 /// ethernet peripheral cannot access)
 static mut TX_RING: Option<[RingEntry<TxDescriptor>; 2]> = None;
 
-// TODO: generate one from device id
-const SRC_MAC: [u8; 6] = [0x00, 0x00, 0xDE, 0xAD, 0xBE, 0xEF];
-
 /// Interrupt pending flag: set by the `ETH` interrupt handler, should
 /// be cleared before polling the interface.
 static NET_PENDING: Mutex<RefCell<bool>> = Mutex::new(RefCell::new(false));
 
 /// Run callback `f` with ethernet driver and TCP/IP stack
-pub fn run<F>(nvic: &mut NVIC, ethernet_mac: ETHERNET_MAC, ethernet_dma: ETHERNET_DMA, f: F)
-where
+pub fn run<F>(
+    nvic: &mut NVIC, ethernet_mac: ETHERNET_MAC, ethernet_dma: ETHERNET_DMA,
+    ethernet_addr: EthernetAddress, f: F
+) where
     F: FnOnce(EthernetInterface<&mut stm32_eth::Eth<'static, 'static>>),
 {
     let rx_ring = unsafe {
@@ -48,7 +47,6 @@ where
     let mut ip_addrs = [IpCidr::new(local_addr, 24)];
     let mut neighbor_storage = [None; 16];
     let neighbor_cache = NeighborCache::new(&mut neighbor_storage[..]);
-    let ethernet_addr = EthernetAddress(SRC_MAC);
     let iface = EthernetInterfaceBuilder::new(&mut eth_dev)
         .ethernet_addr(ethernet_addr)
         .ip_addrs(&mut ip_addrs[..])

@@ -22,7 +22,10 @@ use stm32f4xx_hal::{
     time::U32Ext,
     stm32::{CorePeripherals, Peripherals},
 };
-use smoltcp::time::Instant;
+use smoltcp::{
+    time::Instant,
+    wire::EthernetAddress,
+};
 
 mod adc_input;
 use adc_input::AdcInput;
@@ -38,6 +41,9 @@ use led::Led;
 ///
 /// This should be a multiple of the `TIMER_RATE`.
 const OUTPUT_INTERVAL: u32 = 1000;
+
+#[cfg(not(feature = "generate-hwaddr"))]
+const NET_HWADDR: [u8; 6] = [0x02, 0x00, 0xDE, 0xAD, 0xBE, 0xEF];
 
 #[cfg(not(feature = "semihosting"))]
 fn init_log() {}
@@ -104,8 +110,17 @@ fn main() -> ! {
     info!("Timer setup");
     timer::setup(cp.SYST, clocks);
 
+    #[cfg(not(feature = "generate-hwaddr"))]
+    let hwaddr = EthernetAddress(NET_HWADDR);
+    #[cfg(feature = "generate-hwaddr")]
+    let hwaddr = {
+        let uid = stm32f4xx_hal::signature::Uid::get();
+        EthernetAddress(hash2hwaddr::generate_hwaddr(uid))
+    };
+    info!("Net hwaddr: {}", hwaddr);
+
     info!("Net startup");
-    net::run(&mut cp.NVIC, dp.ETHERNET_MAC, dp.ETHERNET_DMA, |iface| {
+    net::run(&mut cp.NVIC, dp.ETHERNET_MAC, dp.ETHERNET_DMA, hwaddr, |iface| {
         Server::run(iface, |server| {
             let mut last_output = 0_u32;
             loop {
