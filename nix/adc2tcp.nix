@@ -9,7 +9,7 @@ let
   adc2tcpDeps = fetchcargo {
     name = "adc2tcp-deps";
     src = ../.;
-    sha256 = "1wddmsdsqwfzld43g12l2r60ndfwi8ihwm03zzcs9722sirw49fz";
+    sha256 = "0071fn2gj976s20nv6wfjyi0ddcsq17sbpdxkfl0r5hwia5gixph";
   };
 in
 
@@ -18,7 +18,7 @@ buildRustPackage rec {
   version = "0.0.0";
 
   src = ../.;
-  cargoSha256 = "1wddmsdsqwfzld43g12l2r60ndfwi8ihwm03zzcs9722sirw49fz";
+  cargoSha256 = "0071fn2gj976s20nv6wfjyi0ddcsq17sbpdxkfl0r5hwia5gixph";
 
   buildInputs = [ adc2tcpDeps ];
   patchPhase = ''
