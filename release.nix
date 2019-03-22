@@ -11,7 +11,5 @@ let
   };
 in
 {
-  build = runCommand "build-adc2tcp" {
-    buildInputs = [ adc2tcp ];
-  };
+  build = lib.hydraJob adc2tcp;
 }
