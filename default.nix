@@ -8,11 +8,11 @@ let
 in
 with pkgs;
 let
-  rustPlatform = recurseIntoAttrs (callPackage (import ./nix/rustPlatform.nix) {
+  rustPlatform = recurseIntoAttrs (callPackage ./nix/rustPlatform.nix {
     inherit rustManifest;
   });
-  adc2tcp = callPackage (import ./nix/adc2tcp.nix) { inherit rustPlatform; };
-  openocd = callPackage (import ./nix/openocd.nix) {};
+  adc2tcp = callPackage ./nix/adc2tcp.nix { inherit rustPlatform; };
+  openocd = callPackage ./nix/openocd.nix {};
 in
 stdenv.mkDerivation {
   name = "adc2tcp-dist";

@@ -12,18 +12,9 @@ let
 in
 with pkgs;
 let
-  rustPlatform = callPackage (import ./nix/rustPlatform.nix) {};
-  openocd = callPackage (import ./nix/openocd.nix) {};
-  # TODO: gdb 8.2.1 from NixOS >= 19.XX is multiarch by default.
-  # remove the following as `gdb` is already in scope
-  gdb = pkgs.gdb.override {
-    stdenv = stdenv.override {
-      targetPlatform = {
-        config = "arm-none-eabihf";
-        libc = "newlib";
-      };
-    };
-  };
+  rustPlatform = callPackage ./nix/rustPlatform.nix {};
+  openocd = callPackage ./nix/openocd.nix {};
+  gdb = callPackage ./nix/gdb.nix {};
 in
 stdenv.mkDerivation {
   name = "adc2tcp-env";
