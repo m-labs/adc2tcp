@@ -5,7 +5,7 @@
 
 with pkgs;
 let
-  gdb = callPackage ./nix/gdb.nix;
+  gdb = callPackage ./nix/gdb.nix {};
   adc2tcp = callPackage ./default.nix {
     inherit rustManifest;
     mozillaOverlay = import <mozillaOverlay>;
