@@ -24,7 +24,7 @@ stdenv.mkDerivation {
   dontBuild = true;
 
   installPhase = ''
-    mkdir -p $out/bin $out/lib
+    mkdir -p $out/bin $out/lib $out/nix-support
 
     BIN=$out/lib/adc2tcp
     ln -s ${adc2tcp}/lib/adc2tcp $BIN
@@ -38,5 +38,7 @@ stdenv.mkDerivation {
       -c "shutdown"
     EOF
     chmod +x $out/bin/flash-adc2tcp
+
+    echo file binary-dist $BIN >> $out/nix-support/hydra-build-products
   '';
 }

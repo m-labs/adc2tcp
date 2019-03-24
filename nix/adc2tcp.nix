@@ -43,8 +43,7 @@ buildRustPackage rec {
 
   doCheck = false;
   installPhase = ''
-    mkdir -p $out/lib $out/nix-support
+    mkdir -p $out/lib
     cp target/thumbv7em-none-eabihf/release/adc2tcp $out/lib/
-    echo file binary-dist $out/lib/adc2tcp >> $out/nix-support/hydra-build-products
   '';
 }
