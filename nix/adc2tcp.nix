@@ -2,6 +2,7 @@
 
 with rustPlatform;
 let
+  sha256 = "0071fn2gj976s20nv6wfjyi0ddcsq17sbpdxkfl0r5hwia5gixph";
   fetchcargo = import ./fetchcargo.nix {
     inherit stdenv cacert git cargo-vendor;
     inherit (rust) cargo;
@@ -9,7 +10,7 @@ let
   adc2tcpDeps = fetchcargo {
     name = "adc2tcp-deps";
     src = ../.;
-    sha256 = "0071fn2gj976s20nv6wfjyi0ddcsq17sbpdxkfl0r5hwia5gixph";
+    inherit sha256;
   };
 in
 
@@ -18,7 +19,7 @@ buildRustPackage rec {
   version = "0.0.0";
 
   src = ../.;
-  cargoSha256 = "0071fn2gj976s20nv6wfjyi0ddcsq17sbpdxkfl0r5hwia5gixph";
+  cargoSha256 = sha256;
 
   buildInputs = [ adc2tcpDeps ];
   patchPhase = ''
