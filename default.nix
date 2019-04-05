@@ -37,8 +37,7 @@ stdenv.mkDerivation {
     in ''
       mkdir -p $out/bin $out/lib $out/nix-support
 
-      BIN=$out/lib/adc2tcp
-      ln -s ${adc2tcp}/lib/adc2tcp $BIN
+      ln -s ${adc2tcp}/lib/adc2tcp ${firmwareBinary}
 
       makeWrapper ${openocd}/bin/openocd-nucleo-f429zi $out/bin/flash-adc2tcp \
         --add-flags "${lib.escapeShellArgs openOcdFlags}"
