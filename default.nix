@@ -19,26 +19,30 @@ stdenv.mkDerivation {
   buildInputs = [
     adc2tcp
     openocd
+    makeWrapper
   ];
   src = ./.;
   dontBuild = true;
 
-  installPhase = ''
-    mkdir -p $out/bin $out/lib $out/nix-support
+  installPhase =
+    let
+      firmwareBinary = "$out/lib/adc2tcp.elf";
+      openOcdFlags = [
+        "-c" "reset halt"
+        "-c" "flash write_image erase ${firmwareBinary}"
+        "-c" "verify_image ${firmwareBinary}"
+        "-c" "reset run"
+        "-c" "shutdown"
+      ];
+    in ''
+      mkdir -p $out/bin $out/lib $out/nix-support
 
-    BIN=$out/lib/adc2tcp
-    ln -s ${adc2tcp}/lib/adc2tcp $BIN
-    cat >> $out/bin/flash-adc2tcp <<EOF
-    #!/usr/bin/env bash
-    ${openocd}/bin/openocd-nucleo-f429zi \
-      -c "reset halt" \
-      -c "flash write_image erase $BIN" \
-      -c "verify_image $BIN" \
-      -c "reset run" \
-      -c "shutdown"
-    EOF
-    chmod +x $out/bin/flash-adc2tcp
+      BIN=$out/lib/adc2tcp
+      ln -s ${adc2tcp}/lib/adc2tcp $BIN
 
-    echo file binary-dist $BIN >> $out/nix-support/hydra-build-products
-  '';
+      makeWrapper ${openocd}/bin/openocd-nucleo-f429zi $out/bin/flash-adc2tcp \
+        --add-flags "${lib.escapeShellArgs openOcdFlags}"
+
+      echo file binary-dist ${firmwareBinary} >> $out/nix-support/hydra-build-products
+    '';
 }

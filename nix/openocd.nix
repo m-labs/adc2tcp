@@ -1,22 +1,24 @@
-{ stdenv, openocd }:
+{ stdenv, lib, openocd, makeWrapper }:
 
 stdenv.mkDerivation {
   name = "openocd-nucleo-f429zi";
   buildInputs = [
     openocd
+    makeWrapper
   ];
   src = ./.;
   noBuild = true;
-  installPhase = ''
-    mkdir -p $out/bin
-    cat >> $out/bin/openocd-nucleo-f429zi <<EOF
-    #!/usr/bin/env bash
-    ${openocd}/bin/openocd \
-      -f ${openocd}/share/openocd/scripts/interface/stlink-v2-1.cfg \
-      -f ${openocd}/share/openocd/scripts/target/stm32f4x.cfg \
-      -c "init" \
-      "\$@"
-    EOF
-    chmod +x $out/bin/openocd-nucleo-f429zi
-  '';
+  installPhase =
+    let
+      openOcdFlags = [
+        "-f" "${openocd}/share/openocd/scripts/interface/stlink-v2-1.cfg"
+        "-f" "${openocd}/share/openocd/scripts/target/stm32f4x.cfg"
+        "-c" "init"
+      ];
+    in ''
+      mkdir -p $out/bin
+
+      makeWrapper ${openocd}/bin/openocd $out/bin/openocd-nucleo-f429zi \
+        --add-flags "${lib.escapeShellArgs openOcdFlags}"
+    '';
 }
