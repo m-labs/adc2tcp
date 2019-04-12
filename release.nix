@@ -5,7 +5,6 @@
 
 with pkgs;
 let
-  gdb = callPackage ./nix/gdb.nix {};
   adc2tcp = callPackage ./default.nix {
     inherit rustManifest;
     mozillaOverlay = import <mozillaOverlay>;
@@ -13,5 +12,4 @@ let
 in
 {
   build = lib.hydraJob adc2tcp;
-  gdb = lib.hydraJob gdb;
 }
