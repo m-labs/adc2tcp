@@ -123,7 +123,7 @@ fn main() -> ! {
             let mut last_output = 0_u32;
             loop {
                 let now = timer::now().0;
-                let instant = Instant::from_millis(now as i64);
+                let instant = Instant::from_millis(i64::from(now));
                 led_blue.on();
                 cortex_m::interrupt::free(net::clear_pending);
                 server.poll(instant)
@@ -136,7 +136,7 @@ fn main() -> ! {
                 if now - last_output >= OUTPUT_INTERVAL {
                     led_red.on();
                     let adc_value = adc_input.read();
-                    write!(server, "t={},pa3={}\r\n", now, adc_value).unwrap();
+                    writeln!(server, "t={},pa3={}\r", now, adc_value).unwrap();
                     last_output = now;
                     led_red.off();
                 }
