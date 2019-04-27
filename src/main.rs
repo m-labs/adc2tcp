@@ -2,14 +2,12 @@
 #![no_main]
 #![deny(warnings, unused)]
 
-#[allow(unused_extern_crates)]
 #[cfg(not(feature = "semihosting"))]
-extern crate panic_abort;
+use panic_abort as _;
 #[cfg(feature = "semihosting")]
-extern crate panic_semihosting;
+use panic_semihosting as _;
 
-#[macro_use]
-extern crate log;
+use log::{info, warn};
 
 use core::fmt::Write;
 use cortex_m::asm::wfi;
