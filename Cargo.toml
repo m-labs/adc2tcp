@@ -22,15 +22,12 @@ panic-abort = "0.3.1"
 panic-semihosting = { version = "0.5.1", optional = true }
 log = "0.4"
 bare-metal = "0.2"
-cortex-m = "0.5"
+cortex-m = "0.6"
 cortex-m-rt = { version = "0.6", features = ["device"] }
-cortex-m-log = { version = "0.4", features = ["log-integration"] }
-stm32f4 = { version = "0.6", features = ["rt", "stm32f429"] }
+cortex-m-log = { version = "0.5", features = ["log-integration"] }
 embedded-hal = "0.2"
-#stm32f4xx-hal = { version = "0.3.0", features = ["rt", "stm32f429"] }
-stm32f4xx-hal = { git = "https://github.com/stm32-rs/stm32f4xx-hal", features = ["rt", "stm32f429"] }
-#stm32-eth = { version = "0.1.0", features = ["smoltcp-phy", "nucleo-f429zi"] }
-stm32-eth = { git = "https://github.com/stm32-rs/stm32-eth", features = ["smoltcp-phy", "nucleo-f429zi"] }
+stm32f4xx-hal = { version = "0.5", features = ["rt", "stm32f429"] }
+stm32-eth = { version = "0.1.2", features = ["smoltcp-phy", "nucleo-f429zi"] }
 smoltcp = { version = "0.5.0", default-features = false, features = ["proto-ipv4", "socket-tcp", "log"] }
 hash2hwaddr = { version = "0.0", optional = true }
 
