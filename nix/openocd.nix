@@ -6,7 +6,7 @@ stdenv.mkDerivation {
     openocd
     makeWrapper
   ];
-  src = ./.;
+  src = openocd;
   noBuild = true;
   installPhase =
     let
