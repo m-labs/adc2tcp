@@ -42,6 +42,11 @@ buildRustPackage rec {
     EOF
   '';
 
+  buildPhase = ''
+    export CARGO_HOME=$(mktemp -d cargo-home.XXX)
+    cargo build --release
+  '';
+
   doCheck = false;
   installPhase = ''
     mkdir -p $out/lib
