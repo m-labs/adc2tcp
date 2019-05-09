@@ -1,4 +1,4 @@
-{ stdenv, cacert, git, cargo, cargo-vendor }:
+{ stdenv, cacert, git, cargo, cargo-vendor, coreutils }:
 { name, src, sha256 }:
 let
   # `src` restricted to the two files that define dependencies
@@ -10,7 +10,7 @@ let
       mkdir $out
       cp ${src}/Cargo.{toml,lock} $out/
       mkdir $out/src
-      touch src/main.rs
+      ${coreutils}/bin/touch src/main.rs
     '';
   };
 in
