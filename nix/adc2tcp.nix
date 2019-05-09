@@ -2,7 +2,7 @@
 
 with rustPlatform;
 let
-  sha256 = "0071fn2gj976s20nv6wfjyi0ddcsq17sbpdxkfl0r5hwia5gixph";
+  sha256 = "19cdc0lkm9247n6kf23ki66gysz530j1x2lfnzq7n0cpcs53q3h3";
   fetchcargo = import ./fetchcargo.nix {
     inherit stdenv cacert git cargo-vendor;
     inherit (rust) cargo;
