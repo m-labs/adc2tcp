@@ -29,16 +29,6 @@ buildRustPackage rec {
 
     [source.vendored-sources]
     directory = "${adc2tcpDeps}"
-
-    [source."https://github.com/stm32-rs/stm32f4xx-hal"]
-    git = "https://github.com/stm32-rs/stm32f4xx-hal"
-    branch = "master"
-    replace-with = "vendored-sources"
-
-    [source."https://github.com/stm32-rs/stm32-eth"]
-    git = "https://github.com/stm32-rs/stm32-eth"
-    branch = "master"
-    replace-with = "vendored-sources"
     EOF
   '';
 
