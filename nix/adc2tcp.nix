@@ -8,7 +8,7 @@ let
     inherit (rust) cargo;
   };
   adc2tcpDeps = fetchcargo {
-    name = "adc2tcp-deps";
+    name = "adc2tcp";
     src = ../.;
     inherit sha256;
   };

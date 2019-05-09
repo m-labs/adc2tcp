@@ -1,9 +1,21 @@
 { stdenv, cacert, git, cargo, cargo-vendor }:
 { name, src, sha256 }:
+let
+  # `src` restricted to the two files that define dependencies
+  cargoOnlySrc = stdenv.mkDerivation {
+    name = "${name}-cargo";
+    inherit src;
+    phases = "installPhase";
+    installPhase = ''
+      mkdir $out
+      cp ${src}/Cargo.{toml,lock} $out/
+    '';
+  };
+in
 stdenv.mkDerivation {
   name = "${name}-vendor";
   nativeBuildInputs = [ cacert git cargo cargo-vendor ];
-  inherit src;
+  src = cargoOnlySrc;
 
   phases = "unpackPhase patchPhase installPhase";
 
