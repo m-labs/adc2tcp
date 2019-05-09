@@ -9,6 +9,8 @@ let
     installPhase = ''
       mkdir $out
       cp ${src}/Cargo.{toml,lock} $out/
+      mkdir $out/src
+      touch src/main.rs
     '';
   };
 in
