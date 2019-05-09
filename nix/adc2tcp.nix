@@ -1,10 +1,10 @@
-{ stdenv, rustPlatform, cacert, git, cargo-vendor, coreutils }:
+{ stdenv, rustPlatform, cacert, git, cargo-vendor }:
 
 with rustPlatform;
 let
-  sha256 = "19cdc0lkm9247n6kf23ki66gysz530j1x2lfnzq7n0cpcs53q3h3";
+  sha256 = "1i9p5d5n01ajbp8lmavyway6vr1mmy107qnccff9glvr91rqx352";
   fetchcargo = import ./fetchcargo.nix {
-    inherit stdenv cacert git cargo-vendor coreutils;
+    inherit stdenv cacert git cargo-vendor;
     inherit (rust) cargo;
   };
   adc2tcpDeps = fetchcargo {
